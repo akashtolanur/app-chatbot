@@ -1,35 +1,41 @@
 import { useState } from "react";
+import { PromptService } from "@/api/prompt.service";
 
 export default function Prompt() {
     const [reply, setReply] = useState("")
+    const [isLoading, setIsLoading] = useState(false)
 
-    const backendApi = import.meta.env.VITE_APP_BACKEND_HOST;
-
-    async function handleSubmit(event: any) {
+    async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
         event.preventDefault()
-        const formData = new FormData(event.target);
-        const prompt = formData.get("prompt")
-        const res = await fetch(`${backendApi}/chat`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ prompt }),
-        })
-        const data = await res.json()
-        const replyFromAi = data;
-        setReply(replyFromAi?.reply)
-        console.log(replyFromAi.reply);
+        setIsLoading(true)
+            
+        try {
+            const formData = new FormData(event.currentTarget);
+            const prompt = formData.get("prompt") as string;
+            const replyFromAi = await PromptService.givePrompt({ prompt })
+            setReply(replyFromAi?.reply)
+        } catch (error: any) {
+            console.error(error.message || error)
+        } finally {
+            setIsLoading(false)
+        }
     }
 
     return (
         <div>
             <form onSubmit={handleSubmit}>
-                <div style={{ display: "flex", flexDirection: "column", maxWidth: "200px", alignItems: "center", justifyContent: "center" }}>
-                    <input style={{}} type="text" name="prompt" />
-                    <button type="submit">Send Prompt to backend</button>
+                <div className="relative">
+                    {isLoading && (
+                        <p className="text-2xl text-center mt-12">
+                            Loading...
+                        </p>
+                    )}
+                    <p>{reply}</p>
+                    <div className="absolute flex gap-3 top-140 left-50">
+                        <input className="w-full border border-gray-400 rounded" type="text" name="prompt" />
+                        <button className="border bg-blue-600 text-white cursor-pointer rounded px-3 py-1" type="submit">Send</button>
+                    </div>
                 </div>
-                <p>{reply}</p>
             </form>
         </div>
     )

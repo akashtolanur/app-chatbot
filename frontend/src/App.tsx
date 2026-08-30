@@ -1,11 +1,9 @@
-import Prompt from "./app/forms/Prompt"
+import AppRoutes from "@/app/routes/AppRoutes"
 
-function App(){
-
+function App() {
   return (
-    <div>
-      <h1>AI Chat Bot</h1>
-      <Prompt/>
+    <div className="p-4 w-full min-h-screen bg-blue-100">
+      <AppRoutes />
     </div>
   )
 }
